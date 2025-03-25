@@ -1744,91 +1744,91 @@ export default function SignUp() {
     }
   };
 
+  const handleGoogleSignUp = async () => {
+    setLoading(true);
+    setError(null);
+    console.log("Starting Google Sign-Up");
+
+    try {
+      // First check if user already exists
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        throw new Error("You're already signed in");
+      }
+
+      // Initiate Google OAuth for sign-up
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: "http://localhost:8080/auth/callback",
+          queryParams: {
+            access_type: "offline",
+            prompt: "select_account",
+          },
+        },
+      });
+
+      if (googleError) {
+        throw googleError;
+      }
+
+      // Listen for auth state changes to complete sign-up
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          console.log("Google Sign-Up completed, creating user record...");
+
+          // Check if this is a new user
+          const { data: existingUser } = await supabase
+            .from("users")
+            .select("*")
+            .eq("id", session.user.id)
+            .single();
+
+          if (existingUser) {
+            toast.error("Account already exists. Please sign in instead.");
+            await supabase.auth.signOut();
+            return;
+          }
+
+          // Create new user record
+          const userData = {
+            id: session.user.id,
+            email: session.user.email,
+            session_start: new Date().toISOString(),
+            session_token: session.access_token,
+            session_expiry: new Date(session.expires_at * 1000).toISOString(),
+            auth_provider: "google",
+            last_login_at: new Date().toISOString(),
+            is_active: true,
+            role: "Analyst",
+            created_at: new Date().toISOString(),
+          };
+
+          const { error: upsertError } = await supabase
+            .from("users")
+            .insert([userData]);
+
+          if (upsertError) throw upsertError;
+
+          toast.success("Account created successfully with Google!");
+          navigate("/dashboard");
+          subscription.unsubscribe();
+        }
+      });
+    } catch (error) {
+      console.error("Error during Google Sign-Up:", error);
+      toast.error(error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // const handleGoogleSignUp = async () => {
-  //   setLoading(true);
-  //   setError(null);
-  //   console.log("Starting Google Sign-Up");
-
-  //   try {
-  //     // First check if user already exists
-  //     const {
-  //       data: { user },
-  //     } = await supabase.auth.getUser();
-  //     if (user) {
-  //       throw new Error("You're already signed in");
-  //     }
-
-  //     // Initiate Google OAuth for sign-up
-  //     const { error: googleError } = await supabase.auth.signInWithOAuth({
-  //       provider: "google",
-  //       options: {
-  //         redirectTo: "http://localhost:8080/auth/callback",
-  //         queryParams: {
-  //           access_type: "offline",
-  //           prompt: "select_account",
-  //         },
-  //       },
-  //     });
-
-  //     if (googleError) {
-  //       throw googleError;
-  //     }
-
-  //     // Listen for auth state changes to complete sign-up
-  //     const {
-  //       data: { subscription },
-  //     } = supabase.auth.onAuthStateChange(async (event, session) => {
-  //       if (event === "SIGNED_IN" && session) {
-  //         console.log("Google Sign-Up completed, creating user record...");
-
-  //         // Check if this is a new user
-  //         const { data: existingUser } = await supabase
-  //           .from("users")
-  //           .select("*")
-  //           .eq("id", session.user.id)
-  //           .single();
-
-  //         if (existingUser) {
-  //           toast.error("Account already exists. Please sign in instead.");
-  //           await supabase.auth.signOut();
-  //           return;
-  //         }
-
-  //         // Create new user record
-  //         const userData = {
-  //           id: session.user.id,
-  //           email: session.user.email,
-  //           session_start: new Date().toISOString(),
-  //           session_token: session.access_token,
-  //           session_expiry: new Date(session.expires_at * 1000).toISOString(),
-  //           auth_provider: "google",
-  //           last_login_at: new Date().toISOString(),
-  //           is_active: true,
-  //           role: "Analyst", // Default role for new sign-ups
-  //           created_at: new Date().toISOString(),
-  //         };
-
-  //         const { error: upsertError } = await supabase
-  //           .from("users")
-  //           .insert([userData]);
-
-  //         if (upsertError) throw upsertError;
-
-  //         toast.success("Account created successfully with Google!");
-  //         navigate("/dashboard");
-  //         subscription.unsubscribe();
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error("Error during Google Sign-Up:", error);
-  //     toast.error(error.message);
-  //     setError(error.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // const handleGoogleSignIn = async () => {
   //   setLoading(true);
   //   setError(null);
   //   console.log("Starting Google Sign-In");
@@ -1904,96 +1904,96 @@ export default function SignUp() {
   //   }
   // };
 
-  const handleGoogleSignUp = async () => {
-    setLoading(true);
-    setError(null);
-    console.log("Initiating Google Sign-Up");
+  // const handleGoogleSignUp = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   console.log("Initiating Google Sign-Up");
   
-    try {
-      // 1. Pre-check for existing session
-      const { data: { session: existingSession } } = await supabase.auth.getSession();
-      if (existingSession) {
-        await supabase.auth.signOut();
-        throw new Error("Existing session found. Please try again.");
-      }
+  //   try {
+  //     // 1. Pre-check for existing session
+  //     const { data: { session: existingSession } } = await supabase.auth.getSession();
+  //     if (existingSession) {
+  //       await supabase.auth.signOut();
+  //       throw new Error("Existing session found. Please try again.");
+  //     }
   
-      // 2. Initiate Google OAuth with explicit sign-up parameters
-      const { error: authError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: "http://localhost:8080/auth/callback",
-          queryParams: {
-            access_type: "offline",
-            prompt: "select_account",
-            include_granted_scopes: "true"
-          },
-        },
-      });
+  //     // 2. Initiate Google OAuth with explicit sign-up parameters
+  //     const { error: authError } = await supabase.auth.signInWithOAuth({
+  //       provider: "google",
+  //       options: {
+  //         redirectTo: "http://localhost:8080/auth/callback",
+  //         queryParams: {
+  //           access_type: "offline",
+  //           prompt: "select_account",
+  //           include_granted_scopes: "true"
+  //         },
+  //       },
+  //     });
   
-      if (authError) throw authError;
+  //     if (authError) throw authError;
   
-      // 3. Set up single-use auth state listener
-      let authListener: { unsubscribe: () => void } | null = null;
+  //     // 3. Set up single-use auth state listener
+  //     let authListener: { unsubscribe: () => void } | null = null;
       
-      authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === "SIGNED_IN" && session) {
-          try {
-            console.log("Google authentication successful, verifying new user...");
+  //     authListener = supabase.auth.onAuthStateChange(async (event, session) => {
+  //       if (event === "SIGNED_IN" && session) {
+  //         try {
+  //           console.log("Google authentication successful, verifying new user...");
   
-            // 4. Verify new user status
-            const { data: existingUser, error: fetchError } = await supabase
-              .from("users")
-              .select("id")
-              .eq("id", session.user.id)
-              .maybeSingle();
+  //           // 4. Verify new user status
+  //           const { data: existingUser, error: fetchError } = await supabase
+  //             .from("users")
+  //             .select("id")
+  //             .eq("id", session.user.id)
+  //             .maybeSingle();
   
-            if (fetchError) throw fetchError;
-            if (existingUser) {
-              throw new Error("Account already exists. Please sign in.");
-            }
+  //           if (fetchError) throw fetchError;
+  //           if (existingUser) {
+  //             throw new Error("Account already exists. Please sign in.");
+  //           }
   
-            // 5. Create complete user record
-            const { error: createError } = await supabase.from("users").insert({
-              id: session.user.id,
-              email: session.user.email,
-              auth_provider: "google",
-              role: "Analyst",
-              is_active: true,
-              last_login_at: new Date().toISOString(),
-              created_at: new Date().toISOString(),
-              session_start: new Date().toISOString(),
-              session_token: session.access_token,
-              session_expiry: new Date(session.expires_at * 1000).toISOString(),
-            });
+  //           // 5. Create complete user record
+  //           const { error: createError } = await supabase.from("users").insert({
+  //             id: session.user.id,
+  //             email: session.user.email,
+  //             auth_provider: "google",
+  //             role: "Analyst",
+  //             is_active: true,
+  //             last_login_at: new Date().toISOString(),
+  //             created_at: new Date().toISOString(),
+  //             session_start: new Date().toISOString(),
+  //             session_token: session.access_token,
+  //             session_expiry: new Date(session.expires_at * 1000).toISOString(),
+  //           });
   
-            if (createError) throw createError;
+  //           if (createError) throw createError;
   
-            // 6. Finalize successful sign-up
-            toast.success("Welcome to Alignify! Account created successfully.");
-            navigate("/dashboard");
-          } catch (error) {
-            console.error("Post-authentication error:", error);
-            await supabase.auth.signOut();
-            toast.error(error.message);
-          } finally {
-            // 7. Clean up listener
-            authListener?.unsubscribe();
-          }
-        }
-      }).data.subscription;
+  //           // 6. Finalize successful sign-up
+  //           toast.success("Welcome to Alignify! Account created successfully.");
+  //           navigate("/dashboard");
+  //         } catch (error) {
+  //           console.error("Post-authentication error:", error);
+  //           await supabase.auth.signOut();
+  //           toast.error(error.message);
+  //         } finally {
+  //           // 7. Clean up listener
+  //           authListener?.unsubscribe();
+  //         }
+  //       }
+  //     }).data.subscription;
   
-    } catch (error) {
-      console.error("Google Sign-Up failed:", error);
-      setError(error.message);
-      toast.error(error.message || "Sign-up failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   } catch (error) {
+  //     console.error("Google Sign-Up failed:", error);
+  //     setError(error.message);
+  //     toast.error(error.message || "Sign-up failed. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-[#0B0F1A] text-white">
-      {/* <Transform /> */}
+      <Transform />
       <div className="max-w-md mx-auto px-6 py-24">
         <div className="bg-gray-900/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-gray-800">
           <div className="space-y-6">

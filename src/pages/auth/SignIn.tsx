@@ -155,12 +155,24 @@ export default function SignIn() {
   const signupUrl = isMainDomain ? 'https://alignify.net/auth/signup' : '/auth/signup';
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // supabase.auth.getSession().then(({ data: { session } }) => {
+    //   if (session) {
+    //     updateSessionStart(session.user.id);
+    //     navigate('/dashboard');
+    //   }
+    // });
+
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (session) {
-        updateSessionStart(session.user.id);
+        await updateSessionStart(session.user.id);
         navigate('/dashboard');
+        return;
       }
-    });
+    };
+
+    checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change in SignIn:', event, session);
