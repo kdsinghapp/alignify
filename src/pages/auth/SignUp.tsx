@@ -1685,6 +1685,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Transform } from "@/components/dashboard/components/signup/Transform";
+import { Link } from "react-router-dom";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -1732,9 +1733,7 @@ export default function SignUp() {
         throw insertError;
       }
 
-      toast.success(
-        "Sign-up successful!"
-      );
+      toast.success("Sign-up successful!");
       navigate("/auth/signin");
     } catch (error) {
       toast.error(error.message);
@@ -1781,7 +1780,6 @@ export default function SignUp() {
         if (event === "SIGNED_IN" && session) {
           console.log("Google Sign-Up completed, creating user record...");
 
-          // Check if this is a new user
           const { data: existingUser } = await supabase
             .from("users")
             .select("*")
@@ -1827,169 +1825,6 @@ export default function SignUp() {
       setLoading(false);
     }
   };
-
-  // const handleGoogleSignUp = async () => {
-  //   setLoading(true);
-  //   setError(null);
-  //   console.log("Starting Google Sign-In");
-
-  //   try {
-  //     const { data, error: googleError } = await supabase.auth.signInWithOAuth({
-  //       provider: "google",
-  //     });
-
-  //     if (googleError) {
-  //       throw googleError;
-  //     }
-
-  //     console.log("Google OAuth completed, fetching session...");
-
-  //     const { data: sessionData, error: sessionError } =
-  //       await supabase.auth.getSession();
-
-  //     if (sessionError) {
-  //       throw sessionError;
-  //     }
-
-  //     const session = sessionData.session;
-
-  //     if (session) {
-  //       console.log("Session retrieved:", session);
-
-  //       const { data: existingUser, error: fetchError } = await supabase
-  //         .from("users")
-  //         .select("*")
-  //         .eq("id", session.user.id)
-  //         .single();
-
-  //       if (fetchError && fetchError.code !== "PGRST116") {
-  //         throw fetchError;
-  //       }
-
-  //       console.log("User exists:", !!existingUser);
-
-  //       const userData = {
-  //         id: session.user.id,
-  //         email: session.user.email,
-  //         session_start: new Date().toISOString(),
-  //         session_token: session.access_token,
-  //         session_expiry: new Date(session.expires_at * 1000).toISOString(),
-  //         auth_provider: "google",
-  //         last_login_at: new Date().toISOString(),
-  //         is_active: true,
-  //         role: existingUser ? existingUser.role : "Analyst",
-  //       };
-
-  //       const { error: upsertError } = await supabase
-  //         .from("users")
-  //         .upsert([userData], { onConflict: "id" });
-
-  //       if (upsertError) {
-  //         throw upsertError;
-  //       }
-
-  //       toast.success(
-  //         existingUser
-  //           ? "Google sign-in successful!"
-  //           : "Google sign-up successful!"
-  //       );
-  //       navigate("/dashboard");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error during Google Sign-In:", error);
-  //     toast.error(error.message);
-  //     setError(error.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // const handleGoogleSignUp = async () => {
-  //   setLoading(true);
-  //   setError(null);
-  //   console.log("Initiating Google Sign-Up");
-  
-  //   try {
-  //     // 1. Pre-check for existing session
-  //     const { data: { session: existingSession } } = await supabase.auth.getSession();
-  //     if (existingSession) {
-  //       await supabase.auth.signOut();
-  //       throw new Error("Existing session found. Please try again.");
-  //     }
-  
-  //     // 2. Initiate Google OAuth with explicit sign-up parameters
-  //     const { error: authError } = await supabase.auth.signInWithOAuth({
-  //       provider: "google",
-  //       options: {
-  //         redirectTo: "http://localhost:8080/auth/callback",
-  //         queryParams: {
-  //           access_type: "offline",
-  //           prompt: "select_account",
-  //           include_granted_scopes: "true"
-  //         },
-  //       },
-  //     });
-  
-  //     if (authError) throw authError;
-  
-  //     // 3. Set up single-use auth state listener
-  //     let authListener: { unsubscribe: () => void } | null = null;
-      
-  //     authListener = supabase.auth.onAuthStateChange(async (event, session) => {
-  //       if (event === "SIGNED_IN" && session) {
-  //         try {
-  //           console.log("Google authentication successful, verifying new user...");
-  
-  //           // 4. Verify new user status
-  //           const { data: existingUser, error: fetchError } = await supabase
-  //             .from("users")
-  //             .select("id")
-  //             .eq("id", session.user.id)
-  //             .maybeSingle();
-  
-  //           if (fetchError) throw fetchError;
-  //           if (existingUser) {
-  //             throw new Error("Account already exists. Please sign in.");
-  //           }
-  
-  //           // 5. Create complete user record
-  //           const { error: createError } = await supabase.from("users").insert({
-  //             id: session.user.id,
-  //             email: session.user.email,
-  //             auth_provider: "google",
-  //             role: "Analyst",
-  //             is_active: true,
-  //             last_login_at: new Date().toISOString(),
-  //             created_at: new Date().toISOString(),
-  //             session_start: new Date().toISOString(),
-  //             session_token: session.access_token,
-  //             session_expiry: new Date(session.expires_at * 1000).toISOString(),
-  //           });
-  
-  //           if (createError) throw createError;
-  
-  //           // 6. Finalize successful sign-up
-  //           toast.success("Welcome to Alignify! Account created successfully.");
-  //           navigate("/dashboard");
-  //         } catch (error) {
-  //           console.error("Post-authentication error:", error);
-  //           await supabase.auth.signOut();
-  //           toast.error(error.message);
-  //         } finally {
-  //           // 7. Clean up listener
-  //           authListener?.unsubscribe();
-  //         }
-  //       }
-  //     }).data.subscription;
-  
-  //   } catch (error) {
-  //     console.error("Google Sign-Up failed:", error);
-  //     setError(error.message);
-  //     toast.error(error.message || "Sign-up failed. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   return (
     <div className="min-h-screen bg-[#0B0F1A] text-white">
@@ -2074,14 +1909,20 @@ export default function SignUp() {
                 disabled={loading}
                 className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md flex items-center justify-center"
               >
-                {loading ? "Signing up with Google..." : "Sign up with Google"}
+                Sign up with Google
               </button>
             </div>
+
             {error && (
               <div className="p-3 rounded bg-red-500/10 text-red-400 text-sm border border-red-500/20">
                 {error}
               </div>
             )}
+            <Link to="/auth/signin">
+              <p className="text-center text-gray-400 mt-4">
+                Already have an account? Sign in
+              </p>
+            </Link>
           </div>
         </div>
       </div>

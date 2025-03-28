@@ -21,11 +21,11 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 export const Transform = () => {
-    const isDevelopment = window.location.hostname === "localhost";
-    const isMainDomain =
-      window.location.hostname === "alignify.net" ||
-      window.location.hostname === "www.alignify.net";
-    const isBetaDomain = window.location.hostname === "beta.alignify.net";
+  const isDevelopment = window.location.hostname === "localhost";
+  const isMainDomain =
+    window.location.hostname === "alignify.net" ||
+    window.location.hostname === "www.alignify.net";
+  const isBetaDomain = window.location.hostname === "beta.alignify.net";
   const signinUrl = isMainDomain
     ? "https://alignify.net/auth/signin"
     : "/auth/signin";
@@ -51,7 +51,7 @@ export const Transform = () => {
         >
           Alignify
         </Link>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-[4px] md:gap-6">
           <button
             onClick={scrollToTop}
             className="text-gray-300 hover:text-white transition-colors"
@@ -76,7 +76,7 @@ export const Transform = () => {
           >
             Login
           </Link>
-          <Button
+          {/* <Button
             onClick={() =>
               document
                 .getElementById("signup-form")
@@ -85,6 +85,18 @@ export const Transform = () => {
             className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
           >
             Join the Beta
+            <Rocket className="h-4 w-4" />
+          </Button> */}
+          <Button
+            onClick={() =>
+              document
+                .getElementById("signup-form")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+            className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2"
+          >
+            <span className="block md:hidden">Join</span>
+            <span className="hidden md:block">Join the Beta</span>
             <Rocket className="h-4 w-4" />
           </Button>
         </div>
