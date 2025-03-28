@@ -44,57 +44,6 @@ export const Transform = () => {
   };
   return (
     <>
-      {/* <nav className="px-4 sm:px-6 py-4 max-w-7xl mx-auto flex justify-between items-center">
-  <Link
-    to="/"
-    className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600"
-  >
-    Alignify
-  </Link>
- <div className="hidden md:flex items-center gap-6">
-    <button
-      onClick={scrollToTop}
-      className="text-gray-300 hover:text-white transition-colors"
-    >
-      Home
-    </button>
-    <a
-      href="#features"
-      className="text-gray-300 hover:text-white transition-colors"
-    >
-      Features
-    </a>
-    <a
-      href="#faq"
-      className="text-gray-300 hover:text-white transition-colors"
-    >
-      FAQ
-    </a>
-    <Link
-      to={signinUrl}
-      className="text-gray-300 hover:text-white transition-colors"
-    >
-      Login
-    </Link>
-  </div>
-  <div className="flex items-center gap-4">
-    <Link
-      to={signinUrl}
-      className="md:hidden text-gray-300 hover:text-white transition-colors"
-    >
-      Login
-    </Link>
-    
-    <Button
-      onClick={() => document.getElementById("signup-form")?.scrollIntoView({ behavior: "smooth" })}
-      className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-    >
-      <span className="hidden sm:inline">Join the Beta</span>
-      <span className="sm:hidden">Join</span>
-      <Rocket className="h-4 w-4" />
-    </Button>
-  </div>
-</nav> */}
       <nav className="px-6 py-4 max-w-7xl mx-auto flex justify-between items-center">
         <Link
           to="/"
