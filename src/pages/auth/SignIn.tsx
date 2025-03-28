@@ -154,7 +154,7 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
 
   const signupUrl = isMainDomain
-    ? "https://alignify.net/auth/signup"
+    ? "http://localhost:8080/auth/signup"
     : "/auth/signup";
 
   const handleGoogleSignUp = async () => {

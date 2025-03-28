@@ -47,15 +47,19 @@ import Index from "./pages/Index";
 import { PrivateRoute } from "../src/components/auth/PrivateRoute";
 import { PublicRoute } from "../src/components/auth/PublicRoute";
 import { Toaster } from "@/components/ui/sonner";
+import { Verify } from "./pages/auth/Verify";
+import { SetupProfile } from "./pages/auth/SetupProfile";
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route element={<PublicRoute />}>
-        <Route path="/" element={<SignIn />} />
+          <Route path="/" element={<SignIn />} />
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<SignUp />} />
+          <Route path="/auth/signup/verify-otp" element={<Verify />} />
+          <Route path="/profile-setup" element={<SetupProfile />} />
           <Route path="/auth/role-selection" element={<RoleSelection />} />
         </Route>
 

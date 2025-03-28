@@ -1680,64 +1680,394 @@
 //   );
 // }
 
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useEffect, useState } from "react";
+// import { useNavigate } from "react-router-dom";
+// import { supabase } from "@/integrations/supabase/client";
+// import { toast } from "sonner";
+// import { Transform } from "@/components/dashboard/components/signup/Transform";
+// import { Link } from "react-router-dom";
+
+// export default function SignUp() {
+//   const navigate = useNavigate();
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState(null);
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
+//   const [role, setRole] = useState("Analyst");
+
+//   const handleSignUp = async (e) => {
+//     e.preventDefault();
+//     setLoading(true);
+//     setError(null);
+
+//     try {
+//       // Sign up the user with Supabase Auth
+//       const { data, error: signUpError } = await supabase.auth.signUp({
+//         email,
+//         password,
+//       });
+
+//       if (signUpError) {
+//         throw signUpError;
+//       }
+
+//       const userData = {
+//         id: data.user.id,
+//         email: data.user.email,
+//         session_start: new Date().toISOString(),
+//         session_token: data.session?.access_token || null,
+//         session_expiry: data.session
+//           ? new Date(data.session.expires_at * 1000).toISOString()
+//           : null,
+//         auth_provider: "email",
+//         last_login_at: new Date().toISOString(),
+//         is_active: true,
+//         role: role,
+//       };
+
+//       const { error: insertError } = await supabase
+//         .from("users")
+//         .insert([userData]);
+
+//       if (insertError) {
+//         throw insertError;
+//       }
+
+//       toast.success("Sign-up successful!");
+//       navigate("/auth/signin");
+//     } catch (error) {
+//       toast.error(error.message);
+//       setError(error.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleGoogleSignUp = async () => {
+//     setLoading(true);
+//     setError(null);
+//     console.log("Starting Google Sign-Up");
+
+//     try {
+//       // First check if user already exists
+//       const {
+//         data: { user },
+//       } = await supabase.auth.getUser();
+//       if (user) {
+//         throw new Error("You're already signed in");
+//       }
+
+//       // Initiate Google OAuth for sign-up
+//       const { error: googleError } = await supabase.auth.signInWithOAuth({
+//         provider: "google",
+//         options: {
+//           redirectTo: "http://localhost:8080/auth/callback",
+//           queryParams: {
+//             access_type: "offline",
+//             prompt: "select_account",
+//           },
+//         },
+//       });
+
+//       if (googleError) {
+//         throw googleError;
+//       }
+
+//       // Listen for auth state changes to complete sign-up
+//       const {
+//         data: { subscription },
+//       } = supabase.auth.onAuthStateChange(async (event, session) => {
+//         if (event === "SIGNED_IN" && session) {
+//           console.log("Google Sign-Up completed, creating user record...");
+
+//           const { data: existingUser } = await supabase
+//             .from("users")
+//             .select("*")
+//             .eq("id", session.user.id)
+//             .single();
+
+//           if (existingUser) {
+//             toast.error("Account already exists. Please sign in instead.");
+//             await supabase.auth.signOut();
+//             return;
+//           }
+
+//           // Create new user record
+//           const userData = {
+//             id: session.user.id,
+//             email: session.user.email,
+//             session_start: new Date().toISOString(),
+//             session_token: session.access_token,
+//             session_expiry: new Date(session.expires_at * 1000).toISOString(),
+//             auth_provider: "google",
+//             last_login_at: new Date().toISOString(),
+//             is_active: true,
+//             role: "Analyst",
+//             created_at: new Date().toISOString(),
+//           };
+
+//           const { error: upsertError } = await supabase
+//             .from("users")
+//             .insert([userData]);
+
+//           if (upsertError) throw upsertError;
+
+//           toast.success("Account created successfully with Google!");
+//           navigate("/dashboard");
+//           subscription.unsubscribe();
+//         }
+//       });
+//     } catch (error) {
+//       console.error("Error during Google Sign-Up:", error);
+//       toast.error(error.message);
+//       setError(error.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-[#0B0F1A] text-white">
+//       <Transform />
+//       <div className="max-w-md mx-auto px-6 py-24">
+//         <div className="bg-gray-900/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-gray-800">
+//           <div className="space-y-6">
+//             <div>
+//               <h2 className="text-2xl font-bold text-center">
+//                 Create your account
+//               </h2>
+//               <p className="text-center text-gray-400 mt-2">
+//                 Join the Alignify Beta
+//               </p>
+//             </div>
+//             <form onSubmit={handleSignUp} className="space-y-4">
+//               <div>
+//                 <label
+//                   htmlFor="email"
+//                   className="block text-sm font-medium text-gray-300"
+//                 >
+//                   Email
+//                 </label>
+//                 <input
+//                   type="email"
+//                   id="email"
+//                   value={email}
+//                   onChange={(e) => setEmail(e.target.value)}
+//                   className="w-full px-3 py-2 bg-gray-900 text-white border border-gray-700 rounded-md"
+//                   required
+//                 />
+//               </div>
+//               <div>
+//                 <label
+//                   htmlFor="password"
+//                   className="block text-sm font-medium text-gray-300"
+//                 >
+//                   Password
+//                 </label>
+//                 <input
+//                   type="password"
+//                   id="password"
+//                   value={password}
+//                   onChange={(e) => setPassword(e.target.value)}
+//                   className="w-full px-3 py-2 bg-gray-900 text-white border border-gray-700 rounded-md"
+//                   required
+//                 />
+//               </div>
+//               <div>
+//                 <label
+//                   htmlFor="role"
+//                   className="block text-sm font-medium text-gray-300"
+//                 >
+//                   Role
+//                 </label>
+//                 <select
+//                   value={role}
+//                   onChange={(e) => setRole(e.target.value)}
+//                   className="w-full px-3 py-2 bg-gray-900 text-white border border-gray-700 rounded-md"
+//                   required
+//                 >
+//                   <option value="Analyst">Analyst</option>
+//                   <option value="Product Manager">Product Manager</option>
+//                   <option value="Business">Business</option>
+//                   <option value="Finance">Finance</option>
+//                   <option value="Marketing">Marketing</option>
+//                   <option value="Operations">Operations</option>
+//                   <option value="Other">Other</option>
+//                 </select>
+//               </div>
+//               <button
+//                 type="submit"
+//                 disabled={loading}
+//                 className="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md"
+//               >
+//                 {loading ? "Signing up..." : "Sign Up"}
+//               </button>
+//             </form>
+//             <div className="flex items-center justify-center">
+//               <button
+//                 onClick={handleGoogleSignUp}
+//                 disabled={loading}
+//                 className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md flex items-center justify-center"
+//               >
+//                 Sign up with Google
+//               </button>
+//             </div>
+
+//             {error && (
+//               <div className="p-3 rounded bg-red-500/10 text-red-400 text-sm border border-red-500/20">
+//                 {error}
+//               </div>
+//             )}
+//             <Link to="/auth/signin">
+//               <p className="text-center text-gray-400 mt-4">
+//                 Already have an account? Sign in
+//               </p>
+//             </Link>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// Changed Flow
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Transform } from "@/components/dashboard/components/signup/Transform";
-import { Link } from "react-router-dom";
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const [step, setStep] = useState<"signup" | "verify">("signup");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("Analyst");
+  const [otp, setOtp] = useState("");
 
-  const handleSignUp = async (e) => {
+  const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
+  
     try {
-      // Sign up the user with Supabase Auth
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      // 1. Check if email exists
+      const { data: existing } = await supabase
+        .from("users")
+        .select("email")
+        .eq("email", email)
+        .single();
+  
+      if (existing) throw new Error("Email already registered");
+  
+      // 2. Validate inputs
+      if (!email || !password) {
+        throw new Error("Both email and password are required");
+      }
+  
+      // 3. Create auth user (password signup)
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
-
-      if (signUpError) {
-        throw signUpError;
+  
+      if (signUpError) throw signUpError;
+  
+      // 4. Skip OTP sending in development
+      if (process.env.NODE_ENV === "development") {
+        setStep("verify");
+        toast.success("Development Mode: Use OTP 123456");
+        return;
       }
-
-      const userData = {
-        id: data.user.id,
-        email: data.user.email,
-        session_start: new Date().toISOString(),
-        session_token: data.session?.access_token || null,
-        session_expiry: data.session
-          ? new Date(data.session.expires_at * 1000).toISOString()
-          : null,
-        auth_provider: "email",
-        last_login_at: new Date().toISOString(),
-        is_active: true,
-        role: role,
-      };
-
-      const { error: insertError } = await supabase
-        .from("users")
-        .insert([userData]);
-
-      if (insertError) {
-        throw insertError;
-      }
-
-      toast.success("Sign-up successful!");
-      navigate("/auth/signin");
-    } catch (error) {
-      toast.error(error.message);
+  
+      // 5. Production fallback - send real OTP
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false, // User already created
+        },
+      });
+  
+      if (otpError) throw otpError;
+  
+      setStep("verify");
+      toast.success("OTP sent to your email!");
+  
+    } catch (error: any) {
       setError(error.message);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+  
+    try {
+      // 1. OTP Validation
+      const FIXED_OTP = "123456";
+      const isDevelopment = process.env.NODE_ENV === "development";
+  
+      if (!isDevelopment) {
+        throw new Error("Fixed OTP only works in development mode");
+      }
+  
+      if (otp !== FIXED_OTP) {
+        throw new Error("Invalid OTP. Use 123456 for testing");
+      }
+  
+      // 2. Get authenticated user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw new Error(userError?.message || "User not found");
+  
+      // 3. Prepare user data
+      const now = new Date();
+      const userData = {
+        id: user.id,
+        email: user.email,
+        password_hash: null,
+        account_id: null,
+        created_at: now.toISOString(),
+        updated_at: now.toISOString(),
+        role: "user",
+        other_role_description: null,
+        session_token: `sess_${crypto.randomUUID().replace(/-/g, '').substring(0, 24)}`,
+        auth_provider: 'email',
+        google_id: null,
+        last_login_at: now.toISOString(),
+        is_active: true,
+        session_start: now.toISOString(),
+        session_end: null,
+        session_duration: null,
+        session_expiry: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString() // 24h expiry
+      };
+  
+      // 4. Create user record
+      const { error: upsertError } = await supabase
+        .from('users')
+        .upsert(userData, { onConflict: 'id' });
+  
+      if (upsertError) throw upsertError;
+  
+      // 5. Redirect to dashboard
+      toast.success("Account verified and created!");
+      navigate("/profile-setup");
+  
+    } catch (error: any) {
+      console.error("Verification error:", error);
+      toast.error(error.message || "Verification failed");
+      
+      // Handle specific error cases
+      if (error.code === '23503') { // Foreign key violation
+        toast.error("Account reference error. Please try again.");
+      } else if (error.code === '42501') { // Permission denied
+        toast.error("Permission denied. Please contact support.");
+      }
     } finally {
       setLoading(false);
     }
@@ -1746,185 +2076,164 @@ export default function SignUp() {
   const handleGoogleSignUp = async () => {
     setLoading(true);
     setError(null);
-    console.log("Starting Google Sign-Up");
 
     try {
-      // First check if user already exists
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        throw new Error("You're already signed in");
-      }
-
-      // Initiate Google OAuth for sign-up
       const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: {
-          redirectTo: "http://localhost:8080/auth/callback",
-          queryParams: {
-            access_type: "offline",
-            prompt: "select_account",
-          },
-        },
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
       });
 
-      if (googleError) {
-        throw googleError;
-      }
-
-      // Listen for auth state changes to complete sign-up
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === "SIGNED_IN" && session) {
-          console.log("Google Sign-Up completed, creating user record...");
-
-          const { data: existingUser } = await supabase
-            .from("users")
-            .select("*")
-            .eq("id", session.user.id)
-            .single();
-
-          if (existingUser) {
-            toast.error("Account already exists. Please sign in instead.");
-            await supabase.auth.signOut();
-            return;
-          }
-
-          // Create new user record
-          const userData = {
-            id: session.user.id,
-            email: session.user.email,
-            session_start: new Date().toISOString(),
-            session_token: session.access_token,
-            session_expiry: new Date(session.expires_at * 1000).toISOString(),
-            auth_provider: "google",
-            last_login_at: new Date().toISOString(),
-            is_active: true,
-            role: "Analyst",
-            created_at: new Date().toISOString(),
-          };
-
-          const { error: upsertError } = await supabase
-            .from("users")
-            .insert([userData]);
-
-          if (upsertError) throw upsertError;
-
-          toast.success("Account created successfully with Google!");
-          navigate("/dashboard");
-          subscription.unsubscribe();
-        }
-      });
-    } catch (error) {
-      console.error("Error during Google Sign-Up:", error);
-      toast.error(error.message);
+      if (googleError) throw googleError;
+    } catch (error: any) {
       setError(error.message);
+      toast.error("Google signup failed");
     } finally {
       setLoading(false);
     }
   };
 
+  if (step === "verify") {
+    return (
+      <div className="min-h-screen bg-[#0B0F1A] text-white flex items-center justify-center">
+        <div className="max-w-md w-full px-6 py-8">
+          <h1 className="text-3xl font-bold text-center mb-4">Verify Email</h1>
+          <p className="text-center text-gray-400 mb-6">
+            Enter the 6-digit code sent to {email}
+          </p>
+
+          <form onSubmit={handleVerify} className="space-y-4">
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) =>
+                setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              placeholder="000000"
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-center text-2xl tracking-widest"
+              maxLength={6}
+              required
+              autoFocus
+            />
+
+            <button
+              type="submit"
+              disabled={loading || otp.length !== 6}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-medium transition duration-200 disabled:opacity-50"
+            >
+              {loading ? "Verifying..." : "Verify & Login"}
+            </button>
+          </form>
+
+          <div className="mt-4 text-center">
+            <button
+              onClick={async () => {
+                await supabase.auth.signInWithOtp({ email });
+                toast.success("New OTP sent!");
+              }}
+              className="text-purple-400 hover:underline text-sm"
+            >
+              Resend OTP
+            </button>
+          </div>
+
+          {error && (
+            <div className="mt-4 p-3 rounded bg-red-900/50 text-red-400 text-sm text-center">
+              {error}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0B0F1A] text-white">
-      <Transform />
       <div className="max-w-md mx-auto px-6 py-24">
-        <div className="bg-gray-900/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-gray-800">
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-center">
-                Create your account
-              </h2>
-              <p className="text-center text-gray-400 mt-2">
-                Join the Alignify Beta
-              </p>
-            </div>
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-300"
-                >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-900 text-white border border-gray-700 rounded-md"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-300"
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-900 text-white border border-gray-700 rounded-md"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="role"
-                  className="block text-sm font-medium text-gray-300"
-                >
-                  Role
-                </label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-900 text-white border border-gray-700 rounded-md"
-                  required
-                >
-                  <option value="Analyst">Analyst</option>
-                  <option value="Product Manager">Product Manager</option>
-                  <option value="Business">Business</option>
-                  <option value="Finance">Finance</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Operations">Operations</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md"
-              >
-                {loading ? "Signing up..." : "Sign Up"}
-              </button>
-            </form>
-            <div className="flex items-center justify-center">
-              <button
-                onClick={handleGoogleSignUp}
-                disabled={loading}
-                className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md flex items-center justify-center"
-              >
-                Sign up with Google
-              </button>
-            </div>
+        <h1 className="text-3xl font-bold text-center">SIGN UP</h1>
+        <p className="text-center text-gray-400 mt-2">
+          Sign in with email address
+        </p>
 
-            {error && (
-              <div className="p-3 rounded bg-red-500/10 text-red-400 text-sm border border-red-500/20">
-                {error}
-              </div>
-            )}
-            <Link to="/auth/signin">
-              <p className="text-center text-gray-400 mt-4">
-                Already have an account? Sign in
-              </p>
-            </Link>
+        <form onSubmit={handleEmailSignUp} className="space-y-4 mt-6">
+          <div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500"
+              required
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password (min 8 characters)"
+              minLength={8}
+              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-medium transition duration-200"
+          >
+            {loading ? "Sending code..." : "Continue"}
+          </button>
+        </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-purple-500"></div>
+          </div>
+          <div className="relative flex justify-center">
+            <span className="px-2 bg-[#0B0F1A] text-gray-400 text-sm">
+              or continue with
+            </span>
           </div>
         </div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={handleGoogleSignUp}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 w-full py-2 px-4 border border-gray-700 rounded-lg hover:bg-gray-800 transition"
+          >
+            <img
+              src="https://www.google.com/favicon.ico"
+              alt="Google"
+              className="w-5 h-5"
+            />
+            Google
+          </button>
+        </div>
+
+        <p className="text-center text-gray-400 text-sm mt-6">
+          By registering, you agree to our{" "}
+          <Link to="/terms" className="text-purple-400 hover:underline">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link to="/privacy" className="text-purple-400 hover:underline">
+            Privacy Policy
+          </Link>
+        </p>
+
+        <p className="text-center text-gray-400 mt-4">
+          Already have an account?{" "}
+          <Link to="/auth/signin" className="text-purple-400 hover:underline">
+            Sign in
+          </Link>
+        </p>
+
+        {error && (
+          <div className="mt-4 p-3 rounded bg-red-900/50 text-red-400 text-sm text-center">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );
