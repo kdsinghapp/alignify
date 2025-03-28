@@ -327,19 +327,8 @@ export default function SignIn() {
         <div className="bg-white/[0.08] backdrop-blur-xl p-8 rounded-2xl shadow-2xl border border-white/10">
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white">Welcome Back</h2>
-              <p className="text-gray-400 mt-2">
-                Bring your data product ideas to life
-              </p>
-            </div>
-            <div className="flex items-center justify-center">
-              <button
-                onClick={handleGoogleSignUp}
-                disabled={loading}
-                className="w-full px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md flex items-center justify-center"
-              >
-                Sign in with Google
-              </button>
+              <h2 className="text-2xl font-bold text-white">SIGN IN</h2>
+              <p className="text-gray-400 mt-2">Sign in with email address</p>
             </div>
 
             <Auth
@@ -376,7 +365,30 @@ export default function SignIn() {
               theme="dark"
               showLinks={false}
             />
-
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-purple-500"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-2 bg-[#1e222c] text-gray-400 text-sm">
+                  or continue with
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleGoogleSignUp}
+                disabled={loading}
+                className="flex items-center text-white justify-center gap-2 w-full py-2 px-4 border border-gray-700 rounded-lg hover:bg-gray-800 transition"
+              >
+                <img
+                  src="https://www.google.com/favicon.ico"
+                  alt="Google"
+                  className="w-5 h-5"
+                />
+                Google
+              </button>
+            </div>
             <div className="text-center text-sm">
               <span className="text-gray-400">Don't have an account?</span>{" "}
               <Link
@@ -386,6 +398,7 @@ export default function SignIn() {
                 Sign up
               </Link>
             </div>
+
             {error && (
               <div className="p-3 rounded bg-red-500/10 text-red-400 text-sm border border-red-500/20">
                 {error}
