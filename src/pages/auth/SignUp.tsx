@@ -2153,7 +2153,7 @@ export default function SignUp() {
       <div className="max-w-md mx-auto px-6 py-24">
         <h1 className="text-3xl font-bold text-center">SIGN UP</h1>
         <p className="text-center text-gray-400 mt-2">
-          Sign in with email address
+          Sign up with email address
         </p>
 
         <form onSubmit={handleEmailSignUp} className="space-y-4 mt-6">
