@@ -2125,7 +2125,7 @@ export default function SignUp() {
             </button>
           </form>
 
-          <div className="mt-4 text-center">
+          {/* <div className="mt-4 text-center">
             <button
               onClick={async () => {
                 await supabase.auth.signInWithOtp({ email });
@@ -2135,7 +2135,7 @@ export default function SignUp() {
             >
               Resend OTP
             </button>
-          </div>
+          </div> */}
 
           {error && (
             <div className="mt-4 p-3 rounded bg-red-900/50 text-red-400 text-sm text-center">
