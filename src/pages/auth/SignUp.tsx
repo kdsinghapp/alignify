@@ -1935,6 +1935,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Transform } from "@/components/dashboard/components/signup/Transform";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -2148,6 +2149,7 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-[#0B0F1A] text-white">
+      <Transform/>
       <div className="max-w-md mx-auto px-6 py-24">
         <h1 className="text-3xl font-bold text-center">SIGN UP</h1>
         <p className="text-center text-gray-400 mt-2">
