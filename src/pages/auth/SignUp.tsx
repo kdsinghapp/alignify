@@ -2031,6 +2031,9 @@ export default function SignUp() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            skip_confirmation: true 
+          }
         },
       });
 
