@@ -1937,6 +1937,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Transform } from "@/components/dashboard/components/signup/Transform";
 
+const FIXED_OTP = "123456";
+const USE_FIXED_OTP = true;
+
 export default function SignUp() {
   const navigate = useNavigate();
   const [step, setStep] = useState<"signup" | "verify">("signup");
@@ -1946,27 +1949,83 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
 
+  // const handleEmailSignUp = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError(null);
+
+  //   try {
+  //     // 1. Check if email exists
+  //     const { data: existing } = await supabase
+  //       .from("users")
+  //       .select("email")
+  //       .eq("email", email)
+  //       .single();
+
+  //     if (existing) throw new Error("Email already registered");
+
+  //     // 2. Validate inputs
+  //     if (!email || !password) {
+  //       throw new Error("Both email and password are required");
+  //     }
+
+  //     // 3. Create auth user (password signup)
+  //     const { error: signUpError } = await supabase.auth.signUp({
+  //       email,
+  //       password,
+  //       options: {
+  //         emailRedirectTo: `${window.location.origin}/auth/callback`,
+  //       },
+  //     });
+
+  //     if (signUpError) throw signUpError;
+
+  //     // 4. Skip OTP sending in development
+  //     if (process.env.NODE_ENV === "development") {
+  //       setStep("verify");
+  //       toast.success("Development Mode: Use OTP 123456");
+  //       return;
+  //     }
+
+  //     // 5. Production fallback - send real OTP
+  //     const { error: otpError } = await supabase.auth.signInWithOtp({
+  //       email,
+  //       options: {
+  //         shouldCreateUser: false, // User already created
+  //       },
+  //     });
+
+  //     if (otpError) throw otpError;
+
+  //     setStep("verify");
+  //     toast.success("OTP sent to your email!");
+
+  //   } catch (error: any) {
+  //     setError(error.message);
+  //     toast.error(error.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-  
+
     try {
-      // 1. Check if email exists
       const { data: existing } = await supabase
         .from("users")
         .select("email")
         .eq("email", email)
         .single();
-  
+
       if (existing) throw new Error("Email already registered");
-  
-      // 2. Validate inputs
+
       if (!email || !password) {
         throw new Error("Both email and password are required");
       }
-  
-      // 3. Create auth user (password signup)
+
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -1974,29 +2033,26 @@ export default function SignUp() {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-  
+
       if (signUpError) throw signUpError;
-  
-      // 4. Skip OTP sending in development
-      if (process.env.NODE_ENV === "development") {
+
+      if (USE_FIXED_OTP) {
         setStep("verify");
-        toast.success("Development Mode: Use OTP 123456");
+        toast.success(`Use OTP: ${FIXED_OTP}`);
         return;
       }
-  
-      // 5. Production fallback - send real OTP
+
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          shouldCreateUser: false, // User already created
+          shouldCreateUser: false,
         },
       });
-  
+
       if (otpError) throw otpError;
-  
+
       setStep("verify");
       toast.success("OTP sent to your email!");
-  
     } catch (error: any) {
       setError(error.message);
       toast.error(error.message);
@@ -2005,70 +2061,129 @@ export default function SignUp() {
     }
   };
 
+  // const handleVerify = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+
+  //   try {
+  //     // 1. OTP Validation
+  //     const FIXED_OTP = "123456";
+  //     const isDevelopment = process.env.NODE_ENV === "development";
+
+  //     if (!isDevelopment) {
+  //       throw new Error("Fixed OTP only works in development mode");
+  //     }
+
+  //     if (otp !== FIXED_OTP) {
+  //       throw new Error("Invalid OTP. Use 123456 for testing");
+  //     }
+
+  //     const { data: { user }, error: userError } = await supabase.auth.getUser();
+  //     if (userError || !user) throw new Error(userError?.message || "User not found");
+
+  //     // 3. Prepare user data
+  //     const now = new Date();
+  //     const userData = {
+  //       id: user.id,
+  //       email: user.email,
+  //       password_hash: null,
+  //       account_id: null,
+  //       created_at: now.toISOString(),
+  //       updated_at: now.toISOString(),
+  //       role: "user",
+  //       other_role_description: null,
+  //       session_token: `sess_${crypto.randomUUID().replace(/-/g, '').substring(0, 24)}`,
+  //       auth_provider: 'email',
+  //       google_id: null,
+  //       last_login_at: now.toISOString(),
+  //       is_active: true,
+  //       session_start: now.toISOString(),
+  //       session_end: null,
+  //       session_duration: null,
+  //       session_expiry: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString()
+  //     };
+
+  //     const { error: upsertError } = await supabase
+  //       .from('users')
+  //       .upsert(userData, { onConflict: 'id' });
+
+  //     if (upsertError) throw upsertError;
+
+  //     // 5. Redirect to dashboard
+  //     toast.success("Account verified and created!");
+  //     navigate("/profile-setup");
+
+  //   } catch (error: any) {
+  //     console.error("Verification error:", error);
+  //     toast.error(error.message || "Verification failed");
+
+  //     // Handle specific error cases
+  //     if (error.code === '23503') { // Foreign key violation
+  //       toast.error("Account reference error. Please try again.");
+  //     } else if (error.code === '42501') { // Permission denied
+  //       toast.error("Permission denied. Please contact support.");
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
-      // 1. OTP Validation
-      const FIXED_OTP = "123456";
-      const isDevelopment = process.env.NODE_ENV === "development";
-  
-      if (!isDevelopment) {
-        throw new Error("Fixed OTP only works in development mode");
+      if (USE_FIXED_OTP) {
+        if (otp !== FIXED_OTP) {
+          throw new Error(`Invalid OTP. Use ${FIXED_OTP}`);
+        }
+      } else {
+        throw new Error("Real OTP verification not implemented");
       }
-  
-      if (otp !== FIXED_OTP) {
-        throw new Error("Invalid OTP. Use 123456 for testing");
-      }
-  
-      // 2. Get authenticated user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw new Error(userError?.message || "User not found");
-  
-      // 3. Prepare user data
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError || !user)
+        throw new Error(userError?.message || "User not found");
+
       const now = new Date();
       const userData = {
         id: user.id,
         email: user.email,
         password_hash: null,
-        account_id: null,
         created_at: now.toISOString(),
         updated_at: now.toISOString(),
         role: "user",
         other_role_description: null,
-        session_token: `sess_${crypto.randomUUID().replace(/-/g, '').substring(0, 24)}`,
-        auth_provider: 'email',
+        session_token: `sess_${crypto
+          .randomUUID()
+          .replace(/-/g, "")
+          .substring(0, 24)}`,
+        auth_provider: "email",
         google_id: null,
         last_login_at: now.toISOString(),
         is_active: true,
         session_start: now.toISOString(),
         session_end: null,
         session_duration: null,
-        session_expiry: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString() // 24h expiry
+        session_expiry: new Date(
+          now.getTime() + 24 * 60 * 60 * 1000
+        ).toISOString(),
       };
-  
-      // 4. Create user record
+
       const { error: upsertError } = await supabase
-        .from('users')
-        .upsert(userData, { onConflict: 'id' });
-  
+        .from("users")
+        .upsert(userData, { onConflict: "id" });
+
       if (upsertError) throw upsertError;
-  
-      // 5. Redirect to dashboard
+
       toast.success("Account verified and created!");
       navigate("/profile-setup");
-  
     } catch (error: any) {
       console.error("Verification error:", error);
       toast.error(error.message || "Verification failed");
-      
-      // Handle specific error cases
-      if (error.code === '23503') { // Foreign key violation
-        toast.error("Account reference error. Please try again.");
-      } else if (error.code === '42501') { // Permission denied
-        toast.error("Permission denied. Please contact support.");
-      }
     } finally {
       setLoading(false);
     }
@@ -2149,7 +2264,7 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-[#0B0F1A] text-white">
-      <Transform/>
+      {/* <Transform /> */}
       <div className="max-w-md mx-auto px-6 py-24">
         <h1 className="text-3xl font-bold text-center">SIGN UP</h1>
         <p className="text-center text-gray-400 mt-2">
